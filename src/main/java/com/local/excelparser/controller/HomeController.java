@@ -1,5 +1,6 @@
 package com.local.excelparser.controller;
 
+import com.local.excelparser.service.IMServices.ParserServiceImpl;
 import com.local.excelparser.service.Iservices.ParserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +21,8 @@ public class HomeController {
 
     @RequestMapping(value = "excelParser", method = RequestMethod.GET)
     public String loadHome() throws IOException {
-
         System.out.println(parserService.getFileContent(parserService.getFile(FILE_PATH)));
+        ParserServiceImpl.printMapFormatedData(parserService.getFormatedData(parserService.getFileContent(parserService.getFile(FILE_PATH))));
         return "Home";
     }
 }
