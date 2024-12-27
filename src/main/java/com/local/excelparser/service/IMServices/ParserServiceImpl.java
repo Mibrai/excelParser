@@ -1,6 +1,7 @@
 package com.local.excelparser.service.IMServices;
 
 import com.local.excelparser.service.Iservices.ParserService;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -34,9 +35,16 @@ public class ParserServiceImpl implements ParserService {
 
     @Override
     public Map<Integer, List<String>> getFileContent(File file) {
+
+        String[] extArray = file.getName().split("\\.");
+
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
-            Workbook workbook = new XSSFWorkbook(fileInputStream);
+            Workbook workbook;
+            if("xls".equalsIgnoreCase(extArray[extArray.length -1 ]))
+                workbook = new HSSFWorkbook(fileInputStream);
+            else
+                workbook = new XSSFWorkbook(fileInputStream);
 
             //read file
             Sheet sheet = workbook.getSheetAt(0);
@@ -78,6 +86,46 @@ public class ParserServiceImpl implements ParserService {
     }
 
     @Override
+    public Map<String, Map<String, String>> getFormatedData(Map<Integer, List<String>> data) {
+        Map<String, Map<String,String>> formatedData = new HashMap<>();
+        List<String> listLand = new ArrayList<>();
+        for(Integer key : data.keySet()){
+            //key  = 0 is row 0 for =>> Key,EN,DE,FR
+            if(key == 0){
+                listLand = data.get(key);
+                break;
+            }
+        }
+
+        //find Key ,Value in data and prepare FormatedData
+        int index = 0;
+        while ( index < listLand.size()){
+
+            if(index != 0){
+                //Put Land as Key in Map
+                formatedData.put(listLand.get(index),new HashMap<>());
+                //iterate Map data to find key and value for given Land
+                Map<String,String> listLabels = new HashMap<>();
+                for(Integer key : data.keySet()){
+
+                    if(key != 0){
+                        List<String> currentListLabels = data.get(key);
+                        //fill the map with key, value
+                        if(currentListLabels.size() > index)
+                            listLabels.put(currentListLabels.get(0),currentListLabels.get(index));
+                        else
+                            listLabels.put(currentListLabels.get(0),"");
+                    }
+                }
+                formatedData.put(listLand.get(index),listLabels);
+            }
+
+            index++;
+        }
+        return formatedData;
+    }
+
+    @Override
     public boolean writeIntoFile(File file, String texte, String col, String row) {
         return false;
     }
@@ -85,5 +133,14 @@ public class ParserServiceImpl implements ParserService {
     @Override
     public boolean writeMultipleRows(File file, String texte, String[][] coordinates) {
         return false;
+    }
+
+    public static final void printMapFormatedData(Map<String,Map<String,String>> formatedData){
+        for (String key : formatedData.keySet()){
+            System.out.println(key );
+            for (String labelKey : formatedData.get(key).keySet()){
+                System.out.println(labelKey + " = "+formatedData.get(key).get(labelKey));
+            }
+        }
     }
 }

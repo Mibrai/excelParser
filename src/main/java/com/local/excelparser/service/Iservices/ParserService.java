@@ -10,6 +10,7 @@ import java.util.Map;
 public interface ParserService {
     public File getFile(String filePath) throws IOException;
     public Map<Integer, List<String>> getFileContent(File file);
+    public Map<String,Map<String, String>> getFormatedData(Map<Integer, List<String>> data);
     public boolean writeIntoFile(File file, String texte, String col, String row);
 
     public boolean writeMultipleRows(File file, String texte, String[][] coordinates);
